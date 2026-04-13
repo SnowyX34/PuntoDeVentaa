@@ -1,0 +1,166 @@
+<app-navbar class="fixed top-0 left-0 w-full z-50"></app-navbar>
+
+<div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-3 sm:px-4 py-6 md:py-8 max-w-7xl">
+
+        <!-- Header -->
+        <div class="mb-6 pt-24 sm:pt-20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        Configuración de Precios por Nivel
+                    </h1>
+                    <p class="text-gray-600 text-sm md:text-base">
+                        Define precios especiales según el tipo de cliente
+                    </p>
+                </div>
+            </div>
+
+            <!-- Barra de búsqueda -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+
+                <div class="flex flex-col md:flex-row gap-3">
+
+                    <!-- Input -->
+                    <div class="flex-1">
+                        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="searchProducts()"
+                            placeholder="Buscar por modelo, categoría o marca..."
+                            class="w-full h-12 px-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+
+                        <button (click)="searchProducts()"
+                            class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                            Buscar
+                        </button>
+
+                        <button (click)="showFilters = !showFilters"
+                            class="w-full md:w-auto px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition">
+                            Filtros
+                        </button>
+
+                        <button *ngIf="searchTerm || selectedCategory || selectedBrand" (click)="clearFilters()"
+                            class="w-full md:w-auto px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
+                            Limpiar
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div *ngIf="showFilters" class="mt-4 pt-4 border-t">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Categoría</label>
+                            <select [(ngModel)]="selectedCategory" (change)="searchProducts()"
+                                class="w-full h-10 px-3 border border-gray-200 rounded-lg">
+                                <option value="">Todas</option>
+                                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Marca</label>
+                            <select [(ngModel)]="selectedBrand" (change)="searchProducts()"
+                                class="w-full h-10 px-3 border border-gray-200 rounded-lg">
+                                <option value="">Todas</option>
+                                <option *ngFor="let brand of brands" [value]="brand">{{ brand }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Precio mínimo</label>
+                            <input type="number" [(ngModel)]="minPrice" (change)="searchProducts()"
+                                class="w-full h-10 px-3 border border-gray-200 rounded-lg" />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Precio máximo</label>
+                            <input type="number" [(ngModel)]="maxPrice" (change)="searchProducts()"
+                                class="w-full h-10 px-3 border border-gray-200 rounded-lg" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRID PRODUCTOS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <div *ngFor="let product of products"
+                class="bg-white rounded-xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+
+                <!-- Imagen -->
+                <div class="h-40 sm:h-48 md:h-52 bg-gray-100 overflow-hidden">
+                    <img *ngIf="product.imageUrl" [src]="getImageUrl(product.imageUrl)"
+                        class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-4 flex flex-col flex-grow">
+
+                    <div class="flex justify-between mb-2">
+                        <h5 class="text-base md:text-lg font-semibold text-gray-800">
+                            {{ product.modelo }}
+                        </h5>
+                        <span class="text-xs bg-blue-100 px-2 rounded">
+                            Stock: {{ product.stock }}
+                        </span>
+                    </div>
+
+                    <div class="text-sm space-y-1 mb-3">
+                        <p>Color: {{ product.color }}</p>
+                        <p class="text-green-600 font-semibold">
+                            ${{ product.price | number }}
+                        </p>
+                        <p *ngIf="product.brand">Marca: {{ product.brand }}</p>
+                    </div>
+
+                    <p class="text-sm text-gray-700 mb-4 line-clamp-2 border-t pt-2">
+                        {{ product.description || 'Sin descripción' }}
+                    </p>
+
+                    <!-- BOTÓN -->
+                    <button (click)="openPricingModal(product)"
+                        class="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                        <span class="text-xs sm:text-sm">
+                            Configurar precios
+                        </span>
+
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SIN PRODUCTOS -->
+        <div *ngIf="products.length === 0" class="text-center py-16 bg-white rounded-xl shadow-sm mt-6">
+            <p class="text-gray-500 text-lg">No hay productos registrados</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL -->
+<div *ngIf="showPricingModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4"
+    (click)="closePricingModal()">
+
+    <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl p-4 sm:p-6"
+        (click)="$event.stopPropagation()">
+
+        <!-- Botón cerrar -->
+        <button (click)="closePricingModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+            ✕
+        </button>
+
+        <!-- Componente -->
+        <app-product-tier-pricing [product]="selectedProduct" (pricesSaved)="saveProductPrices($event)">
+        </app-product-tier-pricing>
+
+    </div>
+</div>

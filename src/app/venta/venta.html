@@ -1,0 +1,154 @@
+<app-navbar class="fixed top-0 left-0 w-full z-50"></app-navbar>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="container mx-auto px-3 sm:px-4 py-6 md:py-8 max-w-7xl">
+
+    <!-- Header -->
+    <div class="mb-6 pt-24 sm:pt-20">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Panel de ventas</h1>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+        
+        <div class="flex flex-col md:flex-row gap-3">
+          
+          <!-- Input -->
+          <div class="flex-1">
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (keyup.enter)="searchProducts()"
+              placeholder="Buscar productos..."
+              class="w-full h-12 px-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Botones -->
+          <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            
+            <button
+              (click)="searchProducts()"
+              [disabled]="isSearching"
+              class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            >
+              {{ isSearching ? 'Buscando...' : 'Buscar' }}
+            </button>
+
+            <button
+              (click)="showFilters = !showFilters"
+              class="w-full md:w-auto px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition"
+            >
+              Filtros
+            </button>
+
+            <button
+              *ngIf="searchTerm || selectedCategory || selectedBrand || minPrice || maxPrice"
+              (click)="clearFilters()"
+              class="w-full md:w-auto px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+            >
+              Limpiar
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div *ngIf="showFilters" class="mt-4 pt-4 border-t">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <select [(ngModel)]="selectedCategory" (change)="searchProducts()" class="w-full h-10 border rounded-lg px-3">
+              <option value="">Categoría</option>
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+
+            <select [(ngModel)]="selectedBrand" (change)="searchProducts()" class="w-full h-10 border rounded-lg px-3">
+              <option value="">Marca</option>
+              <option *ngFor="let brand of brands" [value]="brand">{{ brand }}</option>
+            </select>
+
+            <input type="number" [(ngModel)]="minPrice" (change)="searchProducts()" placeholder="Min $" class="w-full h-10 border rounded-lg px-3" />
+            <input type="number" [(ngModel)]="maxPrice" (change)="searchProducts()" placeholder="Max $" class="w-full h-10 border rounded-lg px-3" />
+
+          </div>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button (click)="minPrice=0;maxPrice=500;searchProducts()" class="text-xs px-3 py-1 bg-gray-100 rounded-full">$0-500</button>
+            <button (click)="minPrice=500;maxPrice=1000;searchProducts()" class="text-xs px-3 py-1 bg-gray-100 rounded-full">$500-1000</button>
+            <button (click)="minPrice=1000;maxPrice=2000;searchProducts()" class="text-xs px-3 py-1 bg-gray-100 rounded-full">$1000-2000</button>
+            <button (click)="minPrice=2000;maxPrice=null;searchProducts()" class="text-xs px-3 py-1 bg-gray-100 rounded-full">$2000+</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div *ngFor="let product of products"
+        class="bg-white rounded-xl shadow-md border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+
+        <!-- Imagen -->
+        <div class="h-40 sm:h-48 md:h-52 bg-gray-100 overflow-hidden">
+          <img *ngIf="product.imageUrl"
+            [src]="getImageUrl(product.imageUrl)"
+            class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Contenido -->
+        <div class="p-4 flex flex-col flex-grow">
+
+          <div class="flex justify-between mb-2">
+            <h5 class="font-semibold text-gray-800">{{ product.modelo }}</h5>
+            <span class="text-xs bg-blue-100 px-2 rounded">Stock: {{ product.stock }}</span>
+          </div>
+
+          <div class="text-sm space-y-1 mb-3">
+            <p>Color: {{ product.color }}</p>
+            <p class="text-green-600 font-semibold">${{ product.price }}</p>
+            <p *ngIf="product.brand">Marca: {{ product.brand }}</p>
+          </div>
+
+          <!-- Selects -->
+          <div class="flex flex-col sm:flex-row gap-2 mb-2">
+            
+            <select #tier class="w-full sm:w-1/2 bg-gray-800 text-white rounded-lg px-2 py-1 text-sm">
+              <ng-container *ngFor="let t of product.tierPrices | keyvalue">
+                <option *ngIf="t.value.enabled" [value]="t.key">
+                  {{ t.key }} - {{ t.value.price }}
+                </option>
+              </ng-container>
+              <option value="regular">Normal</option>
+            </select>
+
+            <select [(ngModel)]="cantidades[product.id]"
+              class="w-full sm:w-1/2 bg-gray-800 text-white rounded-lg px-2 py-1 text-sm">
+              <option [ngValue]="1">1</option>
+              <option [ngValue]="5">5</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="25">25</option>
+            </select>
+
+          </div>
+
+          <!-- Botón -->
+          <button
+            (click)="addToCart(product, tier.value, cantidades[product.id] || 1)"
+            class="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition">
+            Agregar al carrito
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIN PRODUCTOS -->
+    <div *ngIf="products.length === 0" class="text-center py-16">
+      <p class="text-gray-500 text-lg">No hay productos</p>
+    </div>
+
+  </div>
+</div>

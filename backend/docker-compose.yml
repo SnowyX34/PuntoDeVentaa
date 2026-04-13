@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./backend  # Construir desde código fuente
+    restart: unless-stopped
+    work_dir: ./app
+    env_file:
+      - ./backend/src/config/.env
+    volumes:
+      - ./backend/firebase-key.json:/app/firebase-key.json
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    command: npm run dev
+
+  frontend:
+    build: ./frontend  # Construir desde código fuente
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

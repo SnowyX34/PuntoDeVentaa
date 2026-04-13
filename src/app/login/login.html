@@ -1,0 +1,43 @@
+<!-- Formulario de login, con campos para ingresar el ID y la contraseña del usuario, 
+ utilizando Angular para manejar la lógica de -->
+ <main class="form-signin w-50 m-auto bg-body-tertiary rounded h-50 d-flex justify-content-center align-items-center">
+      <div class="min-h-screen flex items-center justify-center px-4 w-100">
+    <div class="bg-white rounded-xl card-shadow border-0 overflow-hidden w-full max-w-md p-8">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold mb-2">Bienvenido</h1>
+        <p class="text-gray-600 text-sm">Ingresa el ID y la contraseña que sete asigno para continuar</p>
+      </div>
+      <form id="loginForm" class="space-y-4" (ngSubmit)="login()" #form="ngForm">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-gray-700" for="id">ID</label>
+          <input
+          [(ngModel)]="id"
+            type="text"
+            name="id"
+            id="id"
+            placeholder="Ingresa tu ID"
+            class="custom-input w-full h-12 border border-gray-200 rounded-lg pl-3"
+            required
+            autocomplete="ID"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-gray-700" for="password">Contraseña</label>
+          <input
+          [(ngModel)]="passwordEncrypt"
+            name="passwordEncrypt"
+            type="password"
+            id="passwordEncrypt"
+            placeholder="Ingresa tu contraseña"
+            class="custom-input w-full h-12 border border-gray-200 rounded-lg pl-3"
+            required
+             autocomplete="current-password"
+          />
+        </div>
+        <button type="submit" class="btn-primary w-full h-12 text-white font-medium rounded-lg">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+  </main>
