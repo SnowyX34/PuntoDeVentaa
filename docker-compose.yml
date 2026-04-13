@@ -1,8 +1,7 @@
 services:
   backend:
-    build: ./backend  # Construir desde código fuente
+    build: ./backend
     restart: unless-stopped
-    work_dir: ./app
     env_file:
       - ./backend/src/config/.env
     volumes:
@@ -14,7 +13,7 @@ services:
     command: npm run dev
 
   frontend:
-    build: ./frontend  # Construir desde código fuente
+    build: .
     restart: unless-stopped
     ports:
       - "4200:80"
@@ -22,6 +21,7 @@ services:
       - backend
     networks:
       - app-network
+
 networks:
   app-network:
     driver: bridge
