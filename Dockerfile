@@ -12,7 +12,7 @@ RUN npm run build -- --configuration=production
 # Etapa 2: NGINX
 FROM nginx:alpine
 
-COPY --from=build /app/dist/app /usr/share/nginx/html
+COPY --from=build /app/dist/app/browser /usr/share/nginx/html
 
 EXPOSE 80
 
