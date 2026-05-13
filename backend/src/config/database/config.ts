@@ -1,24 +1,15 @@
-import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
-import path from 'path';
+import admin, { ServiceAccount } from 'firebase-admin';
 
-const serviceAccountPath = path.join(__dirname, '../../../firebase-key.json');
-//Carga las credenciales de Firebase desde el archivo JSON
+const serviceAccount: ServiceAccount = {
+  projectId: process.env.FIREBASE_PROJECT_ID as string,
+  privateKey: (process.env.FIREBASE_PRIVATE_KEY as string).replace(/\\n/g, '\n'),
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL as string,
+};
 
-const serviceAccount = JSON.parse(
-    readFileSync(serviceAccountPath, 'utf8')
-);
-
-console.log(serviceAccount.project_id);
-console.log("Service account loaded:", serviceAccount.client_email);
-//Inicializa la aplicación de Firebase con las credenciales
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: serviceAccount.project_id
+  projectId: serviceAccount.projectId
 });
-console.log("Project:", admin.app().options.projectId);
-
-
 
 const db = admin.firestore();
 
