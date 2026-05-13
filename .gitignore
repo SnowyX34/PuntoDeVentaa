@@ -40,3 +40,13 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment files
+.env
+
+#backend files
+/src/config/database/config.ts
+/dist/config/database/config.js
+
+#Environment files
+/src/environments/

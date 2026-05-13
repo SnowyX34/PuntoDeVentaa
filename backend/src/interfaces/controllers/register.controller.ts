@@ -14,6 +14,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     // Se extraen los campos necesarios del cuerpo de la solicitud, que son requeridos para el proceso de registro de un nuevo usuario
     const {
+        id,
         passwordEncrypt,
         nombre,
         paterno,
@@ -24,6 +25,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     // Validar campos obligatorios
     if (
+        !id ||
         !passwordEncrypt ||
         !nombre ||
         !paterno ||
@@ -42,6 +44,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
         // Crear el usuario
         const newUser: IUser = {
+            id,
             nombre,
             passwordEncrypt: hashedPassword,
             paterno,

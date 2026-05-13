@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  endpoint: 'https://puntoventabackend-evl0.onrender.com/api/'
+  endpoint: 'http://localhost:3000/api/'
 };

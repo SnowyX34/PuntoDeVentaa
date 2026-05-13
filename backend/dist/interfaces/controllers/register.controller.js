@@ -15,9 +15,10 @@ const registerUser = async (req, res) => {
         return;
     }
     // Se extraen los campos necesarios del cuerpo de la solicitud, que son requeridos para el proceso de registro de un nuevo usuario
-    const { passwordEncrypt, nombre, paterno, materno, numeroTelefono, tipoUsuario, } = req.body;
+    const { id, passwordEncrypt, nombre, paterno, materno, numeroTelefono, tipoUsuario, } = req.body;
     // Validar campos obligatorios
-    if (!passwordEncrypt ||
+    if (!id ||
+        !passwordEncrypt ||
         !nombre ||
         !paterno ||
         !materno ||
@@ -31,6 +32,7 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcryptjs_1.default.hash(passwordEncrypt, 10);
         // Crear el usuario
         const newUser = {
+            id,
             nombre,
             passwordEncrypt: hashedPassword,
             paterno,

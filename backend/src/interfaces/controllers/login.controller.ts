@@ -10,7 +10,7 @@ export const loginUser = async (req: Request, res: Response) => {
         return res.status(400).json({ msg: "Datos inválidos", errors: errors.array() });
     }
     
-    const { id, passwordEncrypt } = req.body;
+    const { id, passwordEncrypt } = req.body;   
     
     // VALIDACIÓN CRÍTICA: Verificar que el ID sea válido ANTES de usarlo
     if (!id || typeof id !== 'string' || id.trim() === '') {
@@ -22,10 +22,13 @@ export const loginUser = async (req: Request, res: Response) => {
 
     try {
         // Ahora es seguro usar id porque sabemos que es un string no vacío
-        const docRef = db.collection('users').doc(id);
-        const doc = await docRef.get();
+        const userInfo = await db
+        .collection('users')
+        .where('id', '==', id)
+        .limit(1)
+        .get();
         
-        if (!doc.exists) {
+        if (userInfo.empty) {
             console.log("Usuario no encontrado:", id);
             
             // Importante: NO intentar acceder a doc.data() cuando no existe
@@ -35,23 +38,24 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
 
-        const user = doc.data();
+        const user = userInfo.docs[0];
+        const  userData = user.data();
         
         // Verificar si el usuario está bloqueado
-        if (user?.bloqueado === 1) {
+        if (userData?.bloqueado === 1) {
             return res.status(403).json({
                 msg: "Tu cuenta ha sido bloqueada debido a múltiples intentos fallidos. Por favor, contacta al administrador."
             });
         }
         
         // Verificar contraseña
-        const passwordValid = await bcrypt.compare(passwordEncrypt, user?.passwordEncrypt || '');
+        const passwordValid = await bcrypt.compare(passwordEncrypt, userData?.passwordEncrypt || '');
 
         if (!passwordValid) {
-            const nuevosIntentos = (user?.intentosLogueo || 0) + 1;
+            const nuevosIntentos = (userData?.intentosLogueo || 0) + 1;
 
             // Actualizar intentos solo si el usuario existe
-            await docRef.update({
+            await user.ref.update({
                 intentosLogueo: nuevosIntentos,
                 bloqueado: nuevosIntentos >= 5 ? 1 : 0
             });
@@ -63,16 +67,16 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // Restablecer intentos
-        await docRef.update({
+        await user.ref.update({
             intentosLogueo: 0,
         });
 
         // Generar token
         const token = jwt.sign(
             {
-                userId: doc.id,
-                role: Number(user?.tipoUsuario || 1),
-                nombre: user?.nombre,
+                userId: user.id,
+                role: Number(userData?.tipoUsuario || 1),
+                nombre: userData?.nombre,
             },
             process.env['SECRET_KEY'] ?? 'pacoeltaco',
             {

@@ -24,9 +24,12 @@ const loginUser = async (req, res) => {
     }
     try {
         // Ahora es seguro usar id porque sabemos que es un string no vacío
-        const docRef = config_1.default.collection('users').doc(id);
-        const doc = await docRef.get();
-        if (!doc.exists) {
+        const userInfo = await config_1.default
+            .collection('users')
+            .where('id', '==', id)
+            .limit(1)
+            .get();
+        if (userInfo.empty) {
             console.log("Usuario no encontrado:", id);
             // Importante: NO intentar acceder a doc.data() cuando no existe
             // Simplemente devolvemos el error
@@ -34,19 +37,20 @@ const loginUser = async (req, res) => {
                 msg: `Ha ocurrido un problema, vuelve a intentar`
             });
         }
-        const user = doc.data();
+        const user = userInfo.docs[0];
+        const userData = user.data();
         // Verificar si el usuario está bloqueado
-        if ((user === null || user === void 0 ? void 0 : user.bloqueado) === 1) {
+        if ((userData === null || userData === void 0 ? void 0 : userData.bloqueado) === 1) {
             return res.status(403).json({
                 msg: "Tu cuenta ha sido bloqueada debido a múltiples intentos fallidos. Por favor, contacta al administrador."
             });
         }
         // Verificar contraseña
-        const passwordValid = await bcryptjs_1.default.compare(passwordEncrypt, (user === null || user === void 0 ? void 0 : user.passwordEncrypt) || '');
+        const passwordValid = await bcryptjs_1.default.compare(passwordEncrypt, (userData === null || userData === void 0 ? void 0 : userData.passwordEncrypt) || '');
         if (!passwordValid) {
-            const nuevosIntentos = ((user === null || user === void 0 ? void 0 : user.intentosLogueo) || 0) + 1;
+            const nuevosIntentos = ((userData === null || userData === void 0 ? void 0 : userData.intentosLogueo) || 0) + 1;
             // Actualizar intentos solo si el usuario existe
-            await docRef.update({
+            await user.ref.update({
                 intentosLogueo: nuevosIntentos,
                 bloqueado: nuevosIntentos >= 5 ? 1 : 0
             });
@@ -56,14 +60,14 @@ const loginUser = async (req, res) => {
             });
         }
         // Restablecer intentos
-        await docRef.update({
+        await user.ref.update({
             intentosLogueo: 0,
         });
         // Generar token
         const token = jsonwebtoken_1.default.sign({
-            userId: doc.id,
-            role: Number((user === null || user === void 0 ? void 0 : user.tipoUsuario) || 1),
-            nombre: user === null || user === void 0 ? void 0 : user.nombre,
+            userId: user.id,
+            role: Number((userData === null || userData === void 0 ? void 0 : userData.tipoUsuario) || 1),
+            nombre: userData === null || userData === void 0 ? void 0 : userData.nombre,
         }, (_a = process.env['SECRET_KEY']) !== null && _a !== void 0 ? _a : 'pacoeltaco', {
             expiresIn: '24h'
         });
