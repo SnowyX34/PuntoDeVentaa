@@ -47,5 +47,8 @@ export const routes: Routes = [
     {
         path:'reportes',
         component:Reportes
+    },{
+        path: '**',
+        redirectTo: 'login'
     }
 ];

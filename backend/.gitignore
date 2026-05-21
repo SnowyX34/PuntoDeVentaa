@@ -3,8 +3,8 @@
 firebase-key.json
 
 #Conecciones
-/backend/src/config/database/config.ts
-/backend/dist/src/config/database/config.js
+src/config/database/config.ts
+dist/config/database/config.js
 
 #Node modules
 /node_modules
