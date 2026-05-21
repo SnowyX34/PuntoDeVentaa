@@ -8,6 +8,7 @@ import { Venta } from './venta/venta';
 import { Cart } from './cart/cart';
 import { HistorialVentas } from './historial-ventas/historial-ventas';
 import { Reportes } from './reportes/reportes';
+import { authGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -21,33 +22,46 @@ export const routes: Routes = [
     },
     {
         path: 'home',
-        component: Home
+        component: Home,
+        canActivate: [authGuard]
     },
     {
         path: 'productos',
-        component: Productos
+        component: Productos,
+        canActivate: [authGuard]
     },
     { 
         path: 'orders', 
-        component: Venta 
+        component: Venta,
+        canActivate: [authGuard]
     }, 
     { 
         path: 'cart', 
-        component: Cart 
+        component: Cart,
+        canActivate: [authGuard]
     }, 
-    { path: 'userProfile/:id', component: Productos }, // Temporal
-    {
-        path:'priceList',
-        component:PricePerTier
+    { 
+        path: 'userProfile/:id', 
+        component: Productos,
+        canActivate: [authGuard]
     },
     {
-        path:'salesHistory',
-        component:HistorialVentas
+        path: 'priceList',
+        component: PricePerTier,
+        canActivate: [authGuard]
     },
     {
-        path:'reportes',
-        component:Reportes
-    },{
+        path: 'salesHistory',
+        component: HistorialVentas,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'reportes',
+        component: Reportes,
+        canActivate: [authGuard]
+    },
+    // Wildcard al final
+    {
         path: '**',
         redirectTo: 'login'
     }
